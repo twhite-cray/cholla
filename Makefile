@@ -19,7 +19,7 @@ CUDA = -DCUDA -DCUDA_ERROR_CHECK
 
 #To use MPI, MPI_FLAGS must be set to -DMPI_CHOLLA
 #otherwise gcc/g++ will be used for serial compilation
-MPI_FLAGS =  -DMPI_CHOLLA
+#MPI_FLAGS =  -DMPI_CHOLLA
 
 ifdef MPI_FLAGS
   CC	= mpicc
@@ -41,8 +41,8 @@ NVCC	= nvcc
 #PRECISION = -DPRECISION=1
 PRECISION = -DPRECISION=2
 
-OUTPUT = -DBINARY
-#OUTPUT = -DHDF5
+#OUTPUT = -DBINARY
+OUTPUT = -DHDF5
 
 #RECONSTRUCTION = -DPCM
 #RECONSTRUCTION = -DPLMP
@@ -77,7 +77,7 @@ LIBS   = -lm $(HDF5_LIBS) $(CUDA_LIBS)
 FLAGS = $(CUDA) $(PRECISION) $(OUTPUT) $(RECONSTRUCTION) $(SOLVER) $(INTEGRATOR) $(COOLING) #-DSTATIC_GRAV #-DDE -DSCALAR -DSLICES -DPROJECTION -DROTATED_PROJECTION
 CFLAGS 	  = $(OPTIMIZE) $(FLAGS) $(MPI_FLAGS)
 CXXFLAGS  = $(OPTIMIZE) $(FLAGS) $(MPI_FLAGS)
-NVCCFLAGS = $(FLAGS) -fmad=false -ccbin=$(CC) -arch=sm_70
+NVCCFLAGS = $(FLAGS) -fmad=false -arch=sm_60
 
 
 %.o:	%.c
@@ -93,7 +93,11 @@ $(EXEC): $(OBJS) src/gpuCode.o
 	 	 $(CXX) $(OBJS) src/gpuCode.o $(LIBS) -o $(EXEC)
 
 src/gpuCode.o:	$(CUOBJS) 
+<<<<<<< HEAD
 		$(NVCC) -arch=sm_70 -dlink $(CUOBJS) -o src/gpuCode.o $(CUDA_LIBS)
+=======
+		$(NVCC) -arch=sm_60 -dlink $(CUOBJS) -o src/gpuCode.o
+>>>>>>> fa53000cab1791721f838dca72c965ef32b126a8
 
 
 
