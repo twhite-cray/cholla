@@ -15,7 +15,7 @@ CUOBJS   = $(subst .cu,.o,$(CUDAFILES))
 
 #To use GPUs, CUDA must be turned on here
 #Optional error checking can also be enabled
-CUDA = -DCUDA #-DCUDA_ERROR_CHECK
+CUDA = -DCUDA -DCUDA_ERROR_CHECK
 
 #To use MPI, MPI_FLAGS must be set to -DMPI_CHOLLA
 #otherwise gcc/g++ will be used for serial compilation
@@ -23,7 +23,7 @@ MPI_FLAGS =  -DMPI_CHOLLA
 
 ifdef MPI_FLAGS
   CC	= mpicc
-  CXX   = mpicxx
+  CXX   = mpic++
 
   #MPI_FLAGS += -DSLAB
   MPI_FLAGS += -DBLOCK
@@ -57,12 +57,12 @@ SOLVER = -DHLLC
 #INTEGRATOR = -DCTU
 INTEGRATOR = -DVL
 
-COOLING = -DCOOLING_GPU -DCLOUDY_COOL
+COOLING = #-DCOOLING_GPU -DCLOUDY_COOL
 
 
 ifdef CUDA
-CUDA_INCL = -I/usr/local/cuda/include
-CUDA_LIBS = -L/usr/local/cuda/lib64 -lcuda -lcudart
+CUDA_INCL = -I${OLCF_CUDA_ROOT}/include
+CUDA_LIBS = -lcuda -L${OLCF_CUDA_ROOT}/lib64 -lcudart
 endif
 ifeq ($(OUTPUT),-DHDF5)
 HDF5_INCL = -I/usr/local/hdf5/gcc/1.10.0/include
@@ -93,7 +93,7 @@ $(EXEC): $(OBJS) src/gpuCode.o
 	 	 $(CXX) $(OBJS) src/gpuCode.o $(LIBS) -o $(EXEC)
 
 src/gpuCode.o:	$(CUOBJS) 
-		$(NVCC) -arch=sm_70 -dlink $(CUOBJS) -o src/gpuCode.o
+		$(NVCC) -arch=sm_70 -dlink $(CUOBJS) -o src/gpuCode.o $(CUDA_LIBS)
 
 
 

@@ -1,0 +1,161 @@
+Wed May 23 09:02:43 EDT 2018
+Parameter values:  nx = 256, ny = 256, nz = 256, tout = 0.050000, init = Sound_Wave, boundaries = 1 1 1 1 1 1
+Output directory:  ./
+Block based decomposition must use an even number of MPI processes.
+Switching to slab decomposition
+MPI buffer size: 1393920
+Local number of grid cells: 256 256 256 18399744
+Setting initial conditions...
+Initial conditions set.
+Setting boundary conditions...
+Boundary conditions set.
+Dimensions of each cell: dx = 0.003906 dy = 0.003906 dz = 0.003906
+Ratio of specific heats gamma = 1.666667
+Nstep = 0  Timestep = 0.000000  Simulation time = 0.000000
+Init  min:    7.5780  max:    7.5780  avg:    7.5780
+Starting calculations.
+hydro min:    0.4241  max:    0.4241  avg:    0.4241  total:    0.4241
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.0358
+n_step: 1   sim time:  0.0011717   sim timestep: 1.1717e-03  timestep time =  1810.878 ms   total time =    9.3889 s
+hydro min:    0.3158  max:    0.3158  avg:    0.3158  total:    0.7399
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.0716
+n_step: 2   sim time:  0.0023434   sim timestep: 1.1717e-03  timestep time =   351.530 ms   total time =    9.7405 s
+hydro min:    0.2804  max:    0.2804  avg:    0.2804  total:    1.0203
+bound min:    0.0359  max:    0.0359  avg:    0.0359  total:    0.1074
+n_step: 3   sim time:  0.0035152   sim timestep: 1.1717e-03  timestep time =   316.277 ms   total time =   10.0568 s
+hydro min:    0.3116  max:    0.3116  avg:    0.3116  total:    1.3319
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.1431
+n_step: 4   sim time:  0.0046869   sim timestep: 1.1717e-03  timestep time =   347.305 ms   total time =   10.4041 s
+hydro min:    0.2808  max:    0.2808  avg:    0.2808  total:    1.6127
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.1788
+n_step: 5   sim time:  0.0058586   sim timestep: 1.1717e-03  timestep time =   316.551 ms   total time =   10.7207 s
+hydro min:    0.3100  max:    0.3100  avg:    0.3100  total:    1.9227
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.2145
+n_step: 6   sim time:  0.0070303   sim timestep: 1.1717e-03  timestep time =   345.756 ms   total time =   11.0665 s
+hydro min:    0.2801  max:    0.2801  avg:    0.2801  total:    2.2028
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.2503
+n_step: 7   sim time:  0.0082020   sim timestep: 1.1717e-03  timestep time =   315.845 ms   total time =   11.3824 s
+hydro min:    0.3108  max:    0.3108  avg:    0.3108  total:    2.5136
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.2859
+n_step: 8   sim time:  0.0093738   sim timestep: 1.1717e-03  timestep time =   346.553 ms   total time =   11.7289 s
+hydro min:    0.2801  max:    0.2801  avg:    0.2801  total:    2.7937
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.3217
+n_step: 9   sim time:  0.0105455   sim timestep: 1.1717e-03  timestep time =   315.865 ms   total time =   12.0448 s
+hydro min:    0.3115  max:    0.3115  avg:    0.3115  total:    3.1052
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    0.3573
+n_step: 10   sim time:  0.0117172   sim timestep: 1.1717e-03  timestep time =   347.100 ms   total time =   12.3920 s
+hydro min:    0.2806  max:    0.2806  avg:    0.2806  total:    3.3858
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.3930
+n_step: 11   sim time:  0.0128889   sim timestep: 1.1717e-03  timestep time =   316.365 ms   total time =   12.7084 s
+hydro min:    0.3129  max:    0.3129  avg:    0.3129  total:    3.6987
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.4288
+n_step: 12   sim time:  0.0140606   sim timestep: 1.1717e-03  timestep time =   348.779 ms   total time =   13.0572 s
+hydro min:    0.2801  max:    0.2801  avg:    0.2801  total:    3.9788
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.4646
+n_step: 13   sim time:  0.0152323   sim timestep: 1.1717e-03  timestep time =   315.914 ms   total time =   13.3731 s
+hydro min:    0.3108  max:    0.3108  avg:    0.3108  total:    4.2896
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    0.5002
+n_step: 14   sim time:  0.0164041   sim timestep: 1.1717e-03  timestep time =   346.401 ms   total time =   13.7195 s
+hydro min:    0.2804  max:    0.2804  avg:    0.2804  total:    4.5700
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.5360
+n_step: 15   sim time:  0.0175758   sim timestep: 1.1717e-03  timestep time =   316.171 ms   total time =   14.0357 s
+hydro min:    0.3119  max:    0.3119  avg:    0.3119  total:    4.8819
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.5716
+n_step: 16   sim time:  0.0187475   sim timestep: 1.1717e-03  timestep time =   347.614 ms   total time =   14.3834 s
+hydro min:    0.2800  max:    0.2800  avg:    0.2800  total:    5.1619
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.6073
+n_step: 17   sim time:  0.0199192   sim timestep: 1.1717e-03  timestep time =   315.715 ms   total time =   14.6991 s
+hydro min:    0.3126  max:    0.3126  avg:    0.3126  total:    5.4745
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.6431
+n_step: 18   sim time:  0.0210909   sim timestep: 1.1717e-03  timestep time =   348.368 ms   total time =   15.0475 s
+hydro min:    0.2799  max:    0.2799  avg:    0.2799  total:    5.7543
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.6789
+n_step: 19   sim time:  0.0222627   sim timestep: 1.1717e-03  timestep time =   315.701 ms   total time =   15.3632 s
+hydro min:    0.3113  max:    0.3113  avg:    0.3113  total:    6.0656
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.7147
+n_step: 20   sim time:  0.0234344   sim timestep: 1.1717e-03  timestep time =   347.055 ms   total time =   15.7103 s
+hydro min:    0.2812  max:    0.2812  avg:    0.2812  total:    6.3468
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.7503
+n_step: 21   sim time:  0.0246061   sim timestep: 1.1717e-03  timestep time =   316.860 ms   total time =   16.0272 s
+hydro min:    0.3108  max:    0.3108  avg:    0.3108  total:    6.6576
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.7861
+n_step: 22   sim time:  0.0257778   sim timestep: 1.1717e-03  timestep time =   346.662 ms   total time =   16.3739 s
+hydro min:    0.2800  max:    0.2800  avg:    0.2800  total:    6.9377
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.8219
+n_step: 23   sim time:  0.0269495   sim timestep: 1.1717e-03  timestep time =   315.810 ms   total time =   16.6897 s
+hydro min:    0.3108  max:    0.3108  avg:    0.3108  total:    7.2485
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    0.8575
+n_step: 24   sim time:  0.0281213   sim timestep: 1.1717e-03  timestep time =   346.455 ms   total time =   17.0362 s
+hydro min:    0.2797  max:    0.2797  avg:    0.2797  total:    7.5281
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    0.8933
+n_step: 25   sim time:  0.0292930   sim timestep: 1.1717e-03  timestep time =   315.519 ms   total time =   17.3517 s
+hydro min:    0.3113  max:    0.3113  avg:    0.3113  total:    7.8394
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    0.9291
+n_step: 26   sim time:  0.0304647   sim timestep: 1.1717e-03  timestep time =   347.027 ms   total time =   17.6988 s
+hydro min:    0.2803  max:    0.2803  avg:    0.2803  total:    8.1197
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    0.9647
+n_step: 27   sim time:  0.0316364   sim timestep: 1.1717e-03  timestep time =   315.941 ms   total time =   18.0148 s
+hydro min:    0.3113  max:    0.3113  avg:    0.3113  total:    8.4311
+bound min:    0.0358  max:    0.0358  avg:    0.0358  total:    1.0004
+n_step: 28   sim time:  0.0328081   sim timestep: 1.1717e-03  timestep time =   347.116 ms   total time =   18.3619 s
+hydro min:    0.2777  max:    0.2777  avg:    0.2777  total:    8.7087
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.0362
+n_step: 29   sim time:  0.0339798   sim timestep: 1.1717e-03  timestep time =   313.395 ms   total time =   18.6753 s
+hydro min:    0.3099  max:    0.3099  avg:    0.3099  total:    9.0187
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    1.0717
+n_step: 30   sim time:  0.0351516   sim timestep: 1.1717e-03  timestep time =   345.554 ms   total time =   19.0209 s
+hydro min:    0.2789  max:    0.2789  avg:    0.2789  total:    9.2975
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    1.1073
+n_step: 31   sim time:  0.0363233   sim timestep: 1.1717e-03  timestep time =   314.457 ms   total time =   19.3354 s
+hydro min:    0.3108  max:    0.3108  avg:    0.3108  total:    9.6083
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.1430
+n_step: 32   sim time:  0.0374950   sim timestep: 1.1717e-03  timestep time =   346.500 ms   total time =   19.6819 s
+hydro min:    0.2788  max:    0.2788  avg:    0.2788  total:    9.8871
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.1787
+n_step: 33   sim time:  0.0386667   sim timestep: 1.1717e-03  timestep time =   314.504 ms   total time =   19.9965 s
+hydro min:    0.3103  max:    0.3103  avg:    0.3103  total:   10.1974
+bound min:    0.0355  max:    0.0355  avg:    0.0355  total:    1.2142
+n_step: 34   sim time:  0.0398384   sim timestep: 1.1717e-03  timestep time =   345.899 ms   total time =   20.3424 s
+hydro min:    0.2794  max:    0.2794  avg:    0.2794  total:   10.4768
+bound min:    0.0359  max:    0.0359  avg:    0.0359  total:    1.2501
+n_step: 35   sim time:  0.0410102   sim timestep: 1.1717e-03  timestep time =   315.292 ms   total time =   20.6577 s
+hydro min:    0.3105  max:    0.3105  avg:    0.3105  total:   10.7873
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    1.2857
+n_step: 36   sim time:  0.0421819   sim timestep: 1.1717e-03  timestep time =   346.072 ms   total time =   21.0038 s
+hydro min:    0.2794  max:    0.2794  avg:    0.2794  total:   11.0667
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.3213
+n_step: 37   sim time:  0.0433536   sim timestep: 1.1717e-03  timestep time =   315.072 ms   total time =   21.3189 s
+hydro min:    0.3107  max:    0.3107  avg:    0.3107  total:   11.3774
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.3570
+n_step: 38   sim time:  0.0445253   sim timestep: 1.1717e-03  timestep time =   346.459 ms   total time =   21.6654 s
+hydro min:    0.2783  max:    0.2783  avg:    0.2783  total:   11.6557
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.3927
+n_step: 39   sim time:  0.0456970   sim timestep: 1.1717e-03  timestep time =   313.982 ms   total time =   21.9794 s
+hydro min:    0.3114  max:    0.3114  avg:    0.3114  total:   11.9671
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    1.4283
+n_step: 40   sim time:  0.0468688   sim timestep: 1.1717e-03  timestep time =   347.029 ms   total time =   22.3265 s
+hydro min:    0.2784  max:    0.2784  avg:    0.2784  total:   12.2455
+bound min:    0.0356  max:    0.0356  avg:    0.0356  total:    1.4639
+n_step: 41   sim time:  0.0480405   sim timestep: 1.1717e-03  timestep time =   314.002 ms   total time =   22.6405 s
+hydro min:    0.3107  max:    0.3107  avg:    0.3107  total:   12.5561
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.4996
+n_step: 42   sim time:  0.0492122   sim timestep: 1.1717e-03  timestep time =   346.388 ms   total time =   22.9869 s
+hydro min:    0.2788  max:    0.2788  avg:    0.2788  total:   12.8349
+bound min:    0.0357  max:    0.0357  avg:    0.0357  total:    1.5354
+n_step: 43   sim time:  0.0500000   sim timestep: 7.8781e-04  timestep time =   314.554 ms   total time =   23.3015 s
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@batch3>
+Subject: Job 91237: <scaling_1> in cluster <summit> Done
+
+Job <scaling_1> was submitted from host <login5> by user <evans> in cluster <summit> at Wed May 23 09:02:20 2018
+Job was executed on host(s) <1*batch3>, in queue <batch>, as user <evans> in cluster <summit> at Wed May 23 09:02:23 2018
+                            <42*b08n07>
+</ccs/home/evans> was used as the home directory.
+</ccs/home/evans/code/cholla> was used as the working directory.
+Started at Wed May 23 09:02:23 2018
+Terminated at Wed May 23 09:03:07 2018
+Results reported at Wed May 23 09:03:07 2018
+
+The output (if any) is above this job summary.
+

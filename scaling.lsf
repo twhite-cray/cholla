@@ -1,0 +1,13 @@
+#!/bin/bash
+#BSUB -P CSC275robertson
+#BSUB -W 0:30
+#BSUB -nnodes 1
+#BSUB -alloc_flags gpumps
+#BSUB -J scaling_1
+#BSUB -o scaling_1.%J
+#BSUB -e scaling_1.%J
+
+module load cuda
+
+date
+jsrun -n1 -a1 -g1 -c1 ./cholla tests/3D/sound_wave.txt
