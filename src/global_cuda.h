@@ -13,7 +13,7 @@
 #ifndef GLOBAL_CUDA_H
 #define GLOBAL_CUDA_H
 
-#define TPB 1024 // threads per block
+#define TPB 256 // threads per block
 //#define TPB 64
 
 
@@ -22,7 +22,6 @@ extern bool block_size; // Flag becomes true after determining subgrid block siz
 
 // Arrays are global so that they can be allocated only once.
 // Not all arrays will be allocated for every integrator
-// GPU arrays
 // conserved variables
 extern Real *dev_conserved, *dev_conserved_half;
 // input states and associated interface fluxes (Q* and F* from Stone, 2008)
