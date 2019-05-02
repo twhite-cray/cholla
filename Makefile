@@ -15,11 +15,11 @@ CUOBJS   = $(subst .cu,.o,$(CUDAFILES))
 
 #To use GPUs, CUDA must be turned on here
 #Optional error checking can also be enabled
-CUDA = -DCUDA #-DCUDA_ERROR_CHECK
+CUDA = -DCUDA -DCUDA_ERROR_CHECK
 
 #To use MPI, MPI_FLAGS must be set to -DMPI_CHOLLA
 #otherwise gcc/g++ will be used for serial compilation
-MPI_FLAGS =  -DMPI_CHOLLA
+#MPI_FLAGS =  -DMPI_CHOLLA
 
 ifdef MPI_FLAGS
   CC	= mpicc
