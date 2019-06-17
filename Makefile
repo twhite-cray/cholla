@@ -77,7 +77,7 @@ LIBS   = -lm $(HDF5_LIBS) $(CUDA_LIBS)
 FLAGS = $(CUDA) $(PRECISION) $(OUTPUT) $(RECONSTRUCTION) $(SOLVER) $(INTEGRATOR) $(COOLING) #-DSTATIC_GRAV #-DDE -DSCALAR -DSLICES -DPROJECTION -DROTATED_PROJECTION
 CFLAGS 	  = $(OPTIMIZE) $(FLAGS) $(MPI_FLAGS)
 CXXFLAGS  = $(OPTIMIZE) $(FLAGS) $(MPI_FLAGS)
-NVCCFLAGS = $(FLAGS) -fmad=false -arch=sm_60
+NVCCFLAGS = $(FLAGS) -fmad=false -arch=sm_70
 
 
 %.o:	%.c
@@ -93,11 +93,7 @@ $(EXEC): $(OBJS) src/gpuCode.o
 	 	 $(CXX) $(OBJS) src/gpuCode.o $(LIBS) -o $(EXEC)
 
 src/gpuCode.o:	$(CUOBJS) 
-<<<<<<< HEAD
-		$(NVCC) -arch=sm_70 -dlink $(CUOBJS) -o src/gpuCode.o $(CUDA_LIBS)
-=======
-		$(NVCC) -arch=sm_60 -dlink $(CUOBJS) -o src/gpuCode.o
->>>>>>> fa53000cab1791721f838dca72c965ef32b126a8
+		$(NVCC) $(NVCCFLAGS) -dlink $(CUOBJS) -o src/gpuCode.o $(CUDA_LIBS)
 
 
 
