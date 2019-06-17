@@ -19,7 +19,7 @@ CUDA = -DCUDA -DCUDA_ERROR_CHECK
 
 #To use MPI, MPI_FLAGS must be set to -DMPI_CHOLLA
 #otherwise gcc/g++ will be used for serial compilation
-#MPI_FLAGS =  -DMPI_CHOLLA
+MPI_FLAGS =  -DMPI_CHOLLA
 
 ifdef MPI_FLAGS
   CC	= mpicc
@@ -65,8 +65,8 @@ CUDA_INCL = -I${OLCF_CUDA_ROOT}/include
 CUDA_LIBS = -lcuda -L${OLCF_CUDA_ROOT}/lib64 -lcudart
 endif
 ifeq ($(OUTPUT),-DHDF5)
-HDF5_INCL = -I/usr/local/hdf5/gcc/1.10.0/include
-HDF5_LIBS = -L/usr/local/hdf5/gcc/1.10.0/lib64 -lhdf5
+HDF5_INCL = #-I/usr/local/hdf5/gcc/1.10.0/include
+HDF5_LIBS = -lhdf5 #-L/usr/local/hdf5/gcc/1.10.0/lib64
 endif
 
 INCL   = -I./ $(HDF5_INCL)
