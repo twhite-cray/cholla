@@ -180,6 +180,9 @@ int main(int argc, char *argv[])
     #ifdef MPI_CHOLLA
     chprintf("hydro min: %9.4f  max: %9.4f  avg: %9.4f\n", hydro_min, hydro_max, hydro_avg);
     chprintf("bound min: %9.4f  max: %9.4f  avg: %9.4f\n", bound_min, bound_max, bound_avg);
+    #else
+    printf("hydro: %9.4f\n", hydro);
+    printf("bound: %9.4f\n", bound);
     #endif //MPI_CHOLLA
     #endif //CPU_TIME
 
