@@ -1,8 +1,8 @@
 #!/bin/bash
+module load xl cuda fftw hdf5 python
 
-module load gcc hdf5 cuda fftw
-module list
-
+export F_OFFLOAD="-qsmp=omp -qoffload"
+export CHOLLA_ENVSET=1
 export HDF5INCLUDE=${OLCF_HDF5_ROOT}/include
 export HDF5DIR=${OLCF_HDF5_ROOT}/lib
 export MPI_HOME=${MPI_ROOT}

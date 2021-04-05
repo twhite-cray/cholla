@@ -38,7 +38,7 @@ CXXFLAGS           = $(CXXFLAGS_$(BUILD))
 
 CFLAGS   += $(DFLAGS) -Isrc
 CXXFLAGS += $(DFLAGS) -Isrc
-GPUFLAGS += $(DFLAGS) -Isrc
+GPUFLAGS += $(DFLAGS) -Isrc -std=c++11
 
 
 ifeq ($(findstring -DPFFT,$(DFLAGS)),-DPFFT)

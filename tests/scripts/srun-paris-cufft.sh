@@ -6,7 +6,8 @@
 #BSUB -o o.%J
 #BSUB -q debug
 
-module load gcc hdf5 cuda
+module load xl cuda fftw hdf5 python
+module list
 
 OUTDIR="run/out.paris.cufft.${LSB_JOBID}"
 set -x
