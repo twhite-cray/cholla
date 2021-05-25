@@ -98,7 +98,7 @@ ifdef HIPCONFIG
   DFLAGS    += -DO_HIP
   CXXFLAGS  += $(HIPCONFIG)
   GPUCXX    ?= hipcc
-  GPUFLAGS  += -g -O3 -Wall --amdgpu-target=gfx906,gfx908 -std=c++11 -ferror-limit=1
+  GPUFLAGS  += -g -O3 -Wall --amdgpu-target=gfx908 -std=c++11 -ferror-limit=1
   LD        := $(CXX)
   LDFLAGS   := $(CXXFLAGS)
   LIBS      += -L$(ROCM_PATH)/lib -lamdhip64 -lhsa-runtime64
