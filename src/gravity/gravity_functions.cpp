@@ -16,6 +16,7 @@
 
 #ifdef PARIS
 #include <vector>
+#include "gpu.hpp"
 #endif
 
 #ifdef PARTICLES
@@ -329,7 +330,65 @@ static void printDiff(const Real *p, const Real *q, const int nx, const int ny, 
 }
 #endif 
 
+template <typename T>
+class HDArray {
 
+  public:
+
+    HDArray(const size_t n):
+      bytes_(n*sizeof(T))
+    {
+      CHECK(cudaHostAlloc(&host_,bytes_));
+#ifdef GRAVITY_GPU
+      CHECK(cudaMalloc(&device_,bytes_));
+#else
+      device_ = host_;
+#endif
+      zero();
+    }
+
+    ~HDArray()
+    {
+#ifdef GRAVITY_GPU
+      CHECK(cudaFree(device_));
+#endif
+      device_ = nullptr;
+      CHECK(cudaFreeHost(host_));
+      host_ = nullptr;
+    }
+
+    T &operator[](const size_t i) { return host_[i]; }
+
+    void copyFromDevice()
+    {
+#ifdef GRAVITY_GPU
+      CHECK(cudaMemcpy(host_,device_,bytes_,cudaMemcpyDeviceToHost));
+#endif
+    }
+
+    void copyToDevice()
+    {
+#ifdef GRAVITY_GPU
+      CHECK(cudaMemcpy(device_,host_,bytes_,cudaMemcpyHostToDevice));
+#endif
+    }
+
+    T *device() { return device_; }
+    T *host() { return host_; }
+
+    void zero()
+    {
+      memset(host_,0,bytes_);
+#ifdef GRAVITY_GPU
+      CHECK(cudaMemset(device_,0,bytes_));
+#endif
+    }
+
+  protected:
+    size_t bytes_;
+    T *device_;
+    T *host_;
+};
 
 //Initialize the Grav Object at the beginning of the simulation
 void Grid3D::Initialize_Gravity( struct parameters *P ){
@@ -342,7 +401,8 @@ void Grid3D::Initialize_Gravity( struct parameters *P ){
   const bool periodic = (P->xlg_bcnd != 3);
   chprintf("Analytic Test of Poisson Solvers:\n");
   const long ng = N_GHOST_POTENTIAL;
-  std::vector<Real> rho(Grav.n_cells);
+  
+  HDArray<Real> rho(Grav.n_cells);
   std::vector<Real> exact(Grav.n_cells_potential);
 
   if (periodic) {
@@ -368,22 +428,25 @@ void Grid3D::Initialize_Gravity( struct parameters *P ){
         }
       }
     }
-    std::vector<Real> p(Grav.n_cells_potential,0);
-    Grav.Poisson_solver_test.Get_Potential(rho.data(),p.data(),Real(1)/(4*M_PI),0,1);
+    rho.copyToDevice();
+    HDArray<Real> p(Grav.n_cells_potential);
+    Grav.Poisson_solver_test.Get_Potential(rho.device(),p.device(),Real(1)/(4*M_PI),0,1);
     chprintf("Paris");
-    printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
+    p.copyFromDevice();
+    printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 
-    for (Real &pijk : p) pijk = 0;
+    p.zero();
 
 #ifdef CUFFT
     chprintf("CUFFT");
-    Grav.Poisson_solver.Get_Potential(rho.data(),p.data(),Real(1)/(4*M_PI),0,1);
+    Grav.Poisson_solver.Get_Potential(rho.device(),p.device(),Real(1)/(4*M_PI),0,1);
+    p.copyFromDevice();
 #endif
 #ifdef PFFT
     chprintf("PFFT");
-    Grav.Poisson_solver.Get_Potential(rho.data(),p.data(),Real(1)/(4*M_PI),0,1);
+    Grav.Poisson_solver.Get_Potential(rho.host(),p.host(),Real(1)/(4*M_PI),0,1);
 #endif
-    printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
+    printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 
   } else {
 
@@ -412,10 +475,11 @@ void Grid3D::Initialize_Gravity( struct parameters *P ){
         }
       }
     }
-    std::vector<Real> p(Grav.n_cells_potential,0);
-    Grav.Poisson_solver_test.Get_Analytic_Potential(Grav.F.density_h,p.data());
+    HDArray<Real> p(Grav.n_cells_potential);
+    Grav.Poisson_solver_test.Get_Analytic_Potential(Grav.F.density_h,p.device());
+    p.copyFromDevice();
     chprintf("Paris");
-    printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
+    printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 
 #pragma omp parallel for collapse(3)
     for (int k = 0; k < N_GHOST_POTENTIAL; k++) {
@@ -550,8 +614,9 @@ void Grid3D::Compute_Gravitational_Potential( struct parameters *P ){
   #endif//SOR
 
 #ifdef PARIS_TEST
-  std::vector<Real> p(Grav.n_cells_potential);
-  Grav.Poisson_solver_test.Get_Potential(Grav.F.density_h,p.data(),Grav_Constant,dens_avrg,current_a);
+  HDArray<Real> p(Grav.n_cells_potential);
+  Grav.Poisson_solver_test.Get_Potential(input_density,p.device(),Grav_Constant,dens_avrg,current_a);
+  p.copyFromDevice();
 #ifdef CUFFT
   chprintf("Paris vs CUFFT");
 #endif
@@ -576,14 +641,18 @@ void Grid3D::Compute_Gravitational_Potential( struct parameters *P ){
     }
   }
   chprintf("Paris vs Exact");
-  printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local,ng,false);
+  p.copyFromDevice();
+  printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local,ng,false);
   chprintf("SOR vs Exact");
   printDiff(Grav.F.potential_h,exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local,ng,false);
 
   chprintf("Paris vs SOR");
 #endif
 
-  printDiff(p.data(),Grav.F.potential_h,Grav.nx_local,Grav.ny_local,Grav.nz_local);
+#ifdef GRAVITY_GPU
+  CHECK(cudaMemcpy(Grav.F.potential_h,Grav.F.potential_d,Grav.n_cells_potential*sizeof(Real),cudaMemcpyDeviceToHost));
+#endif
+  printDiff(p.host(),Grav.F.potential_h,Grav.nx_local,Grav.ny_local,Grav.nz_local);
 #endif
 
   #ifdef CPU_TIME
@@ -669,7 +738,7 @@ void Grid3D::Copy_Hydro_Density_to_Gravity(){
   
 }
 
-
+#ifdef PARTICLES
 /**
  * Adds a specified potential function to the potential calculated from solving the Poisson equation.
  * The raison d'etre is to solve the evolution of a system where not all particles are simulated.
@@ -699,7 +768,7 @@ void Grid3D::Add_Analytic_Galaxy_Potential(int g_start, int g_end, DiskGalaxy& g
     }
   }
 }
-
+#endif
 
 //Extrapolate the potential to obtain phi_n+1/2
 void Grid3D::Extrapolate_Grav_Potential_Function( int g_start, int g_end ){
