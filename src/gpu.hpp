@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 #ifdef O_HIP
 
@@ -49,6 +50,7 @@ static void __attribute__((unused)) check(const hipfftResult err, const char *co
 #define cudaMalloc hipMalloc
 #define cudaMemcpy hipMemcpy
 #define cudaMemcpyAsync hipMemcpyAsync
+#define cudaMemcpyDefault hipMemcpyDefault
 #define cudaMemcpyDeviceToDevice hipMemcpyDeviceToDevice
 #define cudaMemcpyDeviceToHost hipMemcpyDeviceToHost
 #define cudaMemcpyHostToDevice hipMemcpyHostToDevice
@@ -396,3 +398,160 @@ void gpuFor(const int n0, const int n1, const int n2, const int n3, const int n4
 #define GPU_LAMBDA [=] __device__
 
 #endif
+
+template <typename T> class DeviceArray;
+template <typename T> class HostArray;
+
+template <typename T>
+class DeviceArray {
+  public:
+    DeviceArray() = delete;
+    DeviceArray(const HostArray<T> &);
+    void copy(const HostArray<T> &);
+
+    DeviceArray(const size_t n):
+      bytes_(n*sizeof(T)), p_(nullptr)
+    {
+      alloc();
+      zero();
+    }
+
+    DeviceArray(const DeviceArray &that):
+      bytes_(that.bytes()), p_(nullptr)
+    {
+      alloc();
+      copy(that.data());
+    }
+
+    DeviceArray(const size_t n, const T *const p):
+      bytes_(n*sizeof(T)), p_(nullptr)
+    {
+      alloc();
+      copy(p);
+    }
+
+    ~DeviceArray()
+    {
+      CHECK(cudaFree(p_));
+      p_ = nullptr;
+      bytes_ = 0;
+    }
+
+    size_t const bytes() const { return bytes_; }
+
+    void copy(const T *const p) { CHECK(cudaMemcpy(p_,p,bytes_,cudaMemcpyDefault)); }
+
+    void copy(const DeviceArray<T> &that)
+    {
+      assert(bytes_ == that.bytes());
+      copy(that.data());
+    }
+
+    void copyTo(T *const p) { CHECK(cudaMemcpy(p,p_,bytes_,cudaMemcpyDefault)); }
+
+    void zero() { CHECK(cudaMemset(p_,0,bytes_)); }
+
+    T *data() { return p_; }
+    const T *data() const { return p_; }
+
+  protected:
+    size_t bytes_;
+    T *p_;
+
+    void alloc() { CHECK(cudaMalloc(&p_,bytes_)); }
+};
+
+template <typename T>
+class HostArray {
+  public:
+    HostArray() = delete;
+    HostArray(const DeviceArray<T> &);
+    void copy(const DeviceArray<T> &);
+
+    HostArray(const size_t n):
+      bytes_(n*sizeof(T)), p_(nullptr)
+    {
+      alloc();
+      zero();
+    }
+
+    HostArray(const HostArray<T> &that):
+      bytes_(that.bytes()), p_(nullptr)
+    {
+      alloc();
+      copy(that.data());
+    }
+
+    HostArray(const size_t n, const T *const p):
+      bytes_(n*sizeof(T)), p_(nullptr)
+    {
+      alloc();
+      copy(p);
+    }
+
+    ~HostArray()
+    {
+      if (p_) CHECK(cudaFreeHost(p_));
+      p_ = nullptr;
+      bytes_ = 0;
+    }
+
+    size_t const bytes() const { return bytes_; }
+
+    void copy(const T *const p) { CHECK(cudaMemcpy(p_,p,bytes_,cudaMemcpyDefault)); }
+
+    void copy(const HostArray<T> &that)
+    {
+      assert(bytes_ == that.bytes());
+      copy(that.data());
+    }
+
+    void copyTo(T *const p) { CHECK(cudaMemcpy(p,p_,bytes_,cudaMemcpyDefault)); }
+
+    T *data() { return p_; }
+    const T *data() const { return p_; }
+
+    void zero() { memset(p_,0,bytes_); }
+
+    T &operator[](const size_t i) { return p_[i]; }
+    T operator[](const size_t i) const { return p_[i]; }
+
+  protected:
+    size_t bytes_;
+    T *p_;
+
+    void alloc() { CHECK(cudaHostAlloc(&p_,bytes_,cudaHostAllocDefault)); }
+};
+
+
+template <typename T>
+void DeviceArray<T>::copy(const HostArray<T> &that)
+{
+  assert(bytes_ == that.bytes());
+  copy(that.data());
+}
+
+template <typename T>
+DeviceArray<T>::DeviceArray(const HostArray<T> &that):
+  bytes_(that.bytes()),
+  p_(nullptr)
+{
+  alloc();
+  copy(that.data());
+}
+
+template <typename T>
+void HostArray<T>::copy(const DeviceArray<T> &that)
+{
+  assert(bytes_ == that.bytes());
+  copy(that.data());
+}
+
+template <typename T>
+HostArray<T>::HostArray(const DeviceArray<T> &that):
+  bytes_(that.bytes()),
+  p_(nullptr)
+{
+  alloc();
+  copy(that.data());
+}

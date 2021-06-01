@@ -23,6 +23,10 @@
 #include "../model/disk_galaxy.h"
 #endif
 
+#ifndef GRAVITY_GPU
+#error "Requires GRAVITY_GPU"
+#endif
+
 //Set delta_t when using gravity
 void Grid3D::set_dt_Gravity(){
   
@@ -299,96 +303,42 @@ static void printDiff(const Real *p, const Real *q, const int nx, const int ny, 
   fflush(stdout);
   if (!plot) return;
 
-  printf("###\n");
+  int rank = MPI_PROC_NULL;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+
+  if (rank == 0) {
+
+    printf("###\n");
 #if 0
-  int kMax = -1;
-  for (int k = 0; k < nz; k++) {
-    for (int j = 0; j < ny; j++) {
-      for (int i = 0; i < nx; i++) {
-        const long ijk = i+ng+(nx+ng+ng)*(j+ng+(ny+ng+ng)*(k+ng));
-        const Real qAbs = fabs(q[ijk]);
-        if (qAbs == qMax) kMax = k;
-      }
-    }
-    if (kMax > -1) {
-#endif
-      const int k = nz/2;
+    int kMax = -1;
+    for (int k = 0; k < nz; k++) {
       for (int j = 0; j < ny; j++) {
         for (int i = 0; i < nx; i++) {
           const long ijk = i+ng+(nx+ng+ng)*(j+ng+(ny+ng+ng)*(k+ng));
-          printf("%d %d %g %g %g\n",j,i,q[ijk],p[ijk],q[ijk]-p[ijk]);
+          const Real qAbs = fabs(q[ijk]);
+          if (qAbs == qMax) kMax = k;
         }
-        printf("\n");
       }
-#if 0
-      break;
-    }
-  }
+      if (kMax > -1) {
 #endif
+        const int k = nz/2;
+        for (int j = 0; j < ny; j++) {
+          for (int i = 0; i < nx; i++) {
+            const long ijk = i+ng+(nx+ng+ng)*(j+ng+(ny+ng+ng)*(k+ng));
+            printf("%d %d %g %g %g\n",j,i,q[ijk],p[ijk],q[ijk]-p[ijk]);
+          }
+          printf("\n");
+        }
+#if 0
+        break;
+      }
+    }
+#endif
+  }
   MPI_Finalize();
   exit(0);
 }
 #endif 
-
-template <typename T>
-class HDArray {
-
-  public:
-
-    HDArray(const size_t n):
-      bytes_(n*sizeof(T))
-    {
-      CHECK(cudaHostAlloc(&host_,bytes_));
-#ifdef GRAVITY_GPU
-      CHECK(cudaMalloc(&device_,bytes_));
-#else
-      device_ = host_;
-#endif
-      zero();
-    }
-
-    ~HDArray()
-    {
-#ifdef GRAVITY_GPU
-      CHECK(cudaFree(device_));
-#endif
-      device_ = nullptr;
-      CHECK(cudaFreeHost(host_));
-      host_ = nullptr;
-    }
-
-    T &operator[](const size_t i) { return host_[i]; }
-
-    void copyFromDevice()
-    {
-#ifdef GRAVITY_GPU
-      CHECK(cudaMemcpy(host_,device_,bytes_,cudaMemcpyDeviceToHost));
-#endif
-    }
-
-    void copyToDevice()
-    {
-#ifdef GRAVITY_GPU
-      CHECK(cudaMemcpy(device_,host_,bytes_,cudaMemcpyHostToDevice));
-#endif
-    }
-
-    T *device() { return device_; }
-    T *host() { return host_; }
-
-    void zero()
-    {
-      memset(host_,0,bytes_);
-#ifdef GRAVITY_GPU
-      CHECK(cudaMemset(device_,0,bytes_));
-#endif
-    }
-
-  protected:
-    size_t bytes_;
-    T *device_;
-    T *host_;
-};
 
 //Initialize the Grav Object at the beginning of the simulation
 void Grid3D::Initialize_Gravity( struct parameters *P ){
@@ -402,7 +352,7 @@ void Grid3D::Initialize_Gravity( struct parameters *P ){
   chprintf("Analytic Test of Poisson Solvers:\n");
   const long ng = N_GHOST_POTENTIAL;
   
-  HDArray<Real> rho(Grav.n_cells);
+  HostArray<Real> rho(Grav.n_cells);
   std::vector<Real> exact(Grav.n_cells_potential);
 
   if (periodic) {
@@ -428,25 +378,24 @@ void Grid3D::Initialize_Gravity( struct parameters *P ){
         }
       }
     }
-    rho.copyToDevice();
-    HDArray<Real> p(Grav.n_cells_potential);
-    Grav.Poisson_solver_test.Get_Potential(rho.device(),p.device(),Real(1)/(4*M_PI),0,1);
+    DeviceArray<Real> rhoD(rho);
+    DeviceArray<Real> pD(Grav.n_cells_potential);
+    Grav.Poisson_solver_test.Get_Potential(rhoD.data(),pD.data(),Real(1)/(4*M_PI),0,1);
     chprintf("Paris");
-    p.copyFromDevice();
-    printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
-
-    p.zero();
+    HostArray<Real> p(pD);
+    printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 
 #ifdef CUFFT
     chprintf("CUFFT");
-    Grav.Poisson_solver.Get_Potential(rho.device(),p.device(),Real(1)/(4*M_PI),0,1);
-    p.copyFromDevice();
-#endif
-#ifdef PFFT
+    pD.zero();
+    Grav.Poisson_solver.Get_Potential(rhoD.data(),pD.data(),Real(1)/(4*M_PI),0,1);
+    p.copy(pD);
+#elif defined(PFFT)
     chprintf("PFFT");
-    Grav.Poisson_solver.Get_Potential(rho.host(),p.host(),Real(1)/(4*M_PI),0,1);
+    p.zero();
+    Grav.Poisson_solver.Get_Potential(rho.data(),p.data(),Real(1)/(4*M_PI),0,1);
 #endif
-    printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
+    printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 
   } else {
 
@@ -475,11 +424,10 @@ void Grid3D::Initialize_Gravity( struct parameters *P ){
         }
       }
     }
-    HDArray<Real> p(Grav.n_cells_potential);
-    Grav.Poisson_solver_test.Get_Analytic_Potential(Grav.F.density_h,p.device());
-    p.copyFromDevice();
+    DeviceArray<Real> pD(Grav.n_cells_potential);
+    Grav.Poisson_solver_test.Get_Analytic_Potential(Grav.F.density_h,pD.data()());
     chprintf("Paris");
-    printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
+    printDiff(HostArray<Real>(pD).data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 
 #pragma omp parallel for collapse(3)
     for (int k = 0; k < N_GHOST_POTENTIAL; k++) {
@@ -598,31 +546,22 @@ void Grid3D::Compute_Gravitational_Potential( struct parameters *P ){
   
   //Solve Poisson Equation to compute the potential
   //Poisson Equation: laplacian( phi ) = 4 * pi * G / scale_factor * ( dens - dens_average )
-  Real *input_density, *output_potential;
-  #ifdef GRAVITY_GPU
-  input_density = Grav.F.density_d;
-  output_potential = Grav.F.potential_d;
-  #else
-  input_density = Grav.F.density_h;
-  output_potential = Grav.F.potential_h;
-  #endif
-
-  #ifdef SOR
+#ifdef PFFT
+  HostArray<Real> den(Grav.n_cells,Grav.F.density_d);
+  HostArray<Real> pot(Grav.n_cells_potential);
+  CHECK(cudaMemcpy(Grav.F.density_h,Grav.F.density_d,Grav.n_cells*sizeof(Real),cudaMemcpyDeviceToHost));
+  Grav.Poisson_solver.Get_Potential(Grav.F.density_h,pot.data(),Grav_Constant,dens_avrg,current_a);
+  pot.copyTo(Grav.F.potential_d);
+#elif defined SOR
   Get_Potential_SOR( Grav_Constant, dens_avrg, current_a, P );
-  #else
-  Grav.Poisson_solver.Get_Potential( input_density, output_potential, Grav_Constant, dens_avrg, current_a);
-  #endif//SOR
+#else
+  Grav.Poisson_solver.Get_Potential(Grav.F.density_d,Grav.F.potential_d,Grav_Constant,dens_avrg,current_a);
+#endif
 
 #ifdef PARIS_TEST
-  HDArray<Real> p(Grav.n_cells_potential);
-  Grav.Poisson_solver_test.Get_Potential(input_density,p.device(),Grav_Constant,dens_avrg,current_a);
-  p.copyFromDevice();
-#ifdef CUFFT
-  chprintf("Paris vs CUFFT");
-#endif
-#ifdef PFFT
-  chprintf("Paris vs PFFT");
-#endif
+  DeviceArray<Real> pD(Grav.n_cells_potential);
+  Grav.Poisson_solver_test.Get_Potential(Grav.F.density_d,pD.data(),Grav_Constant,dens_avrg,current_a);
+  HostArray<Real> p(pD);
 #ifdef SOR
   const int ng = N_GHOST_POTENTIAL;
   std::vector<Real> exact(Grav.n_cells_potential);
@@ -641,18 +580,20 @@ void Grid3D::Compute_Gravitational_Potential( struct parameters *P ){
     }
   }
   chprintf("Paris vs Exact");
-  p.copyFromDevice();
-  printDiff(p.host(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local,ng,false);
+  printDiff(p.data(),exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local,ng,false);
   chprintf("SOR vs Exact");
   printDiff(Grav.F.potential_h,exact.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local,ng,false);
 
   chprintf("Paris vs SOR");
 #endif
 
-#ifdef GRAVITY_GPU
-  CHECK(cudaMemcpy(Grav.F.potential_h,Grav.F.potential_d,Grav.n_cells_potential*sizeof(Real),cudaMemcpyDeviceToHost));
+#ifdef CUFFT
+  chprintf("Paris vs CUFFT");
+  HostArray<Real> pot(Grav.n_cells_potential,Grav.F.potential_d);
+#elif defined PFFT
+  chprintf("Paris vs PFFT");
 #endif
-  printDiff(p.host(),Grav.F.potential_h,Grav.nx_local,Grav.ny_local,Grav.nz_local);
+  printDiff(p.data(),pot.data(),Grav.nx_local,Grav.ny_local,Grav.nz_local);
 #endif
 
   #ifdef CPU_TIME

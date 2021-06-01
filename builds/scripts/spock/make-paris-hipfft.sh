@@ -12,8 +12,9 @@ export CC=cc
 export CXX=CC
 export HIPCONFIG=$(hipconfig -C)
 export OMP_NUM_THREADS=16
-export SUFFIX='-spock.hydro'
-export TYPE=hydro
+export POISSON_SOLVER='-DCUFFT -DPARIS'
+export SUFFIX='-spock.paris.hipfft'
+export TYPE=gravity
 
 make clean
 make -j

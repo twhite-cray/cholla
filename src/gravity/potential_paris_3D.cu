@@ -7,6 +7,10 @@
 #include <cfloat>
 #include <climits>
 
+#ifndef GRAVITY_GPU
+#error "Requires GRAVITY_GPU"
+#endif
+
 static void __attribute__((unused)) printDiff(const Real *p, const Real *q, const int ng, const int nx, const int ny, const int nz, const bool plot = false)
 {
   Real dMax = 0, dSum = 0, dSum2 = 0;
@@ -171,14 +175,18 @@ void Potential_Paris_3D::Get_Potential(const Real *const density, Real *const po
 
   if (pp_) {
 
-    gpuFor(n,GPU_LAMBDA(const int i) { db[i] = scale*(db[i]-offset); });
+#ifdef COSMOLOGY
+    gpuFor(n,GPU_LAMBDA(const int i) { db[i] = scale*(density[i]-offset); });
+#else
+    gpuFor(n,GPU_LAMBDA(const int i) { db[i] = scale*density[i]; });
+#endif
     pp_->solve(minBytes_,db,da);
     gpuFor(
       nk,nj,ni,
       GPU_LAMBDA(const int k, const int j, const int i) {
         const int ia = i+ni*(j+nj*k);
         const int ib = i+N_GHOST_POTENTIAL+ngi*(j+N_GHOST_POTENTIAL+ngj*(k+N_GHOST_POTENTIAL));
-        db[ib] = da[ia];
+        potential[ib] = da[ia];
       });
 
   } else {
@@ -211,7 +219,7 @@ void Potential_Paris_3D::Get_Potential(const Real *const density, Real *const po
         const Real y = yBegin+dy*(Real(j)+0.5);
         const Real z = zBegin+dz*(Real(k)+0.5);
         const int iab = i+ni*(j+nj*k);
-        da[iab] = scale*(db[iab]-offset-rho0*exp(-x*x-y*y-z*z));
+        da[iab] = scale*(density[iab]-offset-rho0*exp(-x*x-y*y-z*z));
       });
 
     pz_->solve(minBytes_,da,db);
@@ -230,15 +238,9 @@ void Potential_Paris_3D::Get_Potential(const Real *const density, Real *const po
         const Real v0 = (r < DBL_EPSILON) ? lim0+lim2*r*r : ngmdr0*erf(r)/r;
         const int ia = i+ni*(j+nj*k);
         const int ib = i+N_GHOST_POTENTIAL+ngi*(j+N_GHOST_POTENTIAL+ngj*(k+N_GHOST_POTENTIAL));
-        db[ib] = da[ia]+v0;
+        potential[ib] = da[ia]+v0;
       });
   }
-  assert(potential);
-  #ifdef GRAVITY_GPU
-  CHECK(cudaMemcpy(potential,db,potentialBytes_,cudaMemcpyDeviceToDevice));
-  #else
-  CHECK(cudaMemcpy(potential,db,potentialBytes_,cudaMemcpyDeviceToHost));
-  #endif
 }
 
 void Potential_Paris_3D::Initialize(const Real lx, const Real ly, const Real lz, const Real xMin, const Real yMin, const Real zMin, const int nx, const int ny, const int nz, const int nxReal, const int nyReal, const int nzReal, const Real dx, const Real dy, const Real dz, const bool periodic)
